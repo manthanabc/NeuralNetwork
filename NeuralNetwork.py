@@ -57,7 +57,7 @@ FEED FORWARD
 
         0.2  	0.3 		0.562
 1.0									out
-		0.6 	0.45999999	0.974
+	0.6 	0.45999999	0.974
 
 		0.54
 
@@ -81,7 +81,7 @@ class NeuralNetwork():
 	def matrixadd(self,arr1,arr2):
 		out=arr1
 		if len(arr1) != len(arr2):
-			print("donre")
+			print("wronge inpout for matrix add")
 			exit()
 
 		if type(arr1[0]) == type(0.5):
@@ -126,7 +126,7 @@ class NeuralNetwork():
 
 		for i in range(len(out)):
 			for j in range(len(out[i])):
-				out[i][j]=oneDmultiply( arr1[i] , arr2 , j)
+				out[i][j]=self.oneDmultiply( arr1[i] , arr2 , j)
 		return out
 
 
@@ -153,17 +153,20 @@ class NeuralNetwork():
 		#print(out)
 		return out
 	 
-	def feed_forward(self,network,inp):
+	def feed_forward(self):
+		network=self.network
+		inp=self.inp
 		value=[[] for i in range(len(network[0])+1)]
 
 		value[0]=inp
-		value[1]=matrixadd(transpose(multiply_by_num(value[0][0],network[0][0])),transpose(network[1][0]))
+		print("---",self.transpose(self.multiply_by_num(value[0][0],network[0][0])),"and",self.transpose(network[1][0]),"---")
+		value[1]=self.matrixadd(self.transpose(self.multiply_by_num(value[0][0],network[0][0])),self.transpose(network[1][0]))
 
 		for layerno in range(2,len(network[0])+1):	
 			#print("adding -",multiply(transpose(network[0][layerno-1]),value[layerno-1])," and ",transpose(network[1][layerno-1]),"-")
-			value[layerno]=matrixadd(multiply(transpose(network[0][layerno-1]),value[layerno-1]),transpose(network[1][layerno-1]))
+			value[layerno]=self.matrixadd(self.multiply(self.transpose(network[0][layerno-1]),value[layerno-1]),self.transpose(network[1][layerno-1]))
 			#print(f'value is {value}')
-		return value[-1]
+		return value[-1],
 
 	'''
 	at least thisweights work
@@ -185,8 +188,5 @@ class NeuralNetwork():
 		bias2=[0.01,0.03]
 		bias3=[0.0]
 
-		self.network=[[[[random.random() for i in range(arr[i+1])] for j in range(arr[i])] for i in range(len(arr)-1)],[[random.random() for j in range(arr[i])] for i in range(len(arr))]]
-		print(self.network[1])
-		#network=[[neuralW1,neuralW2,neuralW3],[bias1,bias2,bias3]]
-		#got_result=self.feed_forward(network,[inp])
-		#print(got_result)
+		self.network=[[[[random.random() for i in range(arr[i+1])] for j in range(arr[i])] for i in range(len(arr)-1)],[[random.random() for j in range(arr[i])] for i in range(1,len(arr))]]
+		print(self.network)
