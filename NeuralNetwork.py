@@ -23,18 +23,23 @@ to watch = https://www.youtube.com/watch?v=QJoa0JYaX1I
 	[x1,x2,x3] * [y2] = [(x1.y1)+(x2.y2)+(x3.y3)] 
 		     [y3]	 
 
-ERROR CALCULATION 
+
+
+ERROR CALCULATION {BACK PROPAGATIOn}
+
+w11     w(weight)1(first neuron)1(first weight coming out of neuron i.e weight of wire from first neuron of this layer to first neuron of next layer)
 #######################################################################		
-#								      #
-#	  weights       errors 		  	errors 		      #
-#   (of this layer)    (next layer)	 (of this layer)	      #
-#								      #
-#								      #
-#	[w1]   			   	[(w11.e1)+(w12.e2)+(w13.e3)]  #
-#	[w2] x [e1 , e2, e3]	=	[(w21.e1)+(w22.e2)+(w23.e3)]  #
-#	[w3]   				[(w31.e1)+(w33.e2)+(w33.e3)]  #
-#								      #
+#								      				  						  #
+#	  weights             errors 		  	       errors 		              #
+#   (of this layer)    (next layer)	            (of this layer)	       		  #
+#								                            		  		  #
+#								     						    			  #
+#	[w11,w12,w13]   			   			[(w11.e1)+(w12.e2)+(w13.e3)]      #
+#	[w21,w22,w23]   x  [e1 , e2, e3]	=	[(w21.e1)+(w22.e2)+(w23.e3)]      #
+#	[w31,w32,w33]   						[(w31.e1)+(w33.e2)+(w33.e3)]      #
+#														              
 #######################################################################
+
 
 FEED FORWARD
 ###############################################################################		
@@ -74,7 +79,7 @@ network[1]=[[bias of first layer],[bias of second layer]..]
 network[1][0]=[bias of first neuron,bias of second neuron,bias of third neuron]
 
 '''
-import random
+import random,math
 
 class NeuralNetwork():
 
@@ -117,7 +122,7 @@ class NeuralNetwork():
 	def multiply(self,arr1,arr2):
 
 		if not len(arr1[0]) == len(arr2):
-			print("\n\n\n\n 444444 000004 4444")
+			print("\n\n\n\n invalid multiply matrises")
 			sys.exit(1)
 
 		# making a matrix with rows equal to arr1 and coloms equal to arr2 
@@ -141,6 +146,10 @@ class NeuralNetwork():
 		return out
 
 
+	def activaton(self,x):
+		return 1/(1+math.exp(-x));
+
+
 	def transpose(self,array):	
 		if type(array[0]) == type(0.5):
 				#print("doing a single dimentional transpose")
@@ -153,20 +162,39 @@ class NeuralNetwork():
 		#print(out)
 		return out
 	 
+	def back_propagate(self):
+		
+		network=self.network[0]
+		oriex=self.expected[:]
+		#print(oriex)
+		expt=self.matrixadd(self.expected,self.multiply_by_num(-1,self.feed_forward()))
+		error=[[] for i in range(len(network[0])+1)]
+		error[-1]=expt
+
+		#to create the output layer but without any weights in them
+		network.append([[] for i in range(len(network[-1][0]))])
+
+		for layerno in range(len(network)-1):
+			Rlayerno=len(network)-2-layerno
+			print("at layer-",Rlayerno,"-")
+			f
+
+		return Eweights
+		
+
 	def feed_forward(self):
 		network=self.network
 		inp=self.inp
 		value=[[] for i in range(len(network[0])+1)]
 
 		value[0]=inp
-		print("---",self.transpose(self.multiply_by_num(value[0][0],network[0][0])),"and",self.transpose(network[1][0]),"---")
-		value[1]=self.matrixadd(self.transpose(self.multiply_by_num(value[0][0],network[0][0])),self.transpose(network[1][0]))
-
-		for layerno in range(2,len(network[0])+1):	
-			#print("adding -",multiply(transpose(network[0][layerno-1]),value[layerno-1])," and ",transpose(network[1][layerno-1]),"-")
+		for layerno in range(1,len(network[0])+1):	
 			value[layerno]=self.matrixadd(self.multiply(self.transpose(network[0][layerno-1]),value[layerno-1]),self.transpose(network[1][layerno-1]))
-			#print(f'value is {value}')
-		return value[-1],
+			for i in range(len(value[layerno])):
+				value[layerno][i][0]=self.activaton(value[layerno][i][0])
+		
+		#print(f'value is- -{value}--\n\n')
+		return value[-1]
 
 	'''
 	at least thisweights work
@@ -177,16 +205,23 @@ class NeuralNetwork():
 	'''
 	def __init__(self,arr):
 
-		inp=1.0
-		expected=0.56
+		self.inp=[[0.9],[0.1],[0.8]]
+		self.expected=[[0.6],[0.5],[0.3]]
 		
-		neuralW1=[[0.2,0.6]]
-		neuralW2=[[0.2,0.6],[0.6,0.3]]
-		neuralW3=[[0.2],[0.4]]
+		neuralW1=[[0.9,0.2,0.1],[0.3,0.8,0.5],[0.4,0.2,0.6]]
+		neuralW2=[[0.3,0.6,0.8],[0.7,0.5,0.1],[0.5,0.2,0.9]]
 
-		bias1=[0.01,0.03]
-		bias2=[0.01,0.03]
-		bias3=[0.0]
+		bias1=[0.0,0.0,0.0]
+		bias2=[0.0,0.0,0.0]
+		bias3=[0.0,0.0,0.0]
 
-		self.network=[[[[random.random() for i in range(arr[i+1])] for j in range(arr[i])] for i in range(len(arr)-1)],[[random.random() for j in range(arr[i])] for i in range(1,len(arr))]]
-		print(self.network)
+		self.network=[[neuralW1,neuralW2],[bias1,bias2,bias1]]
+
+		#uncomment to randomly initianlize the network randomly
+
+		#self.network=[[[[random.random() for i in range(arr[i+1])] for j in range(arr[i])] for i in range(len(arr)-1)],[[random.random() for j in range(arr[i])] for i in range(1,len(arr))]]
+		#print(self.network)
+
+
+a=NeuralNetwork([3,3,3])
+print(a.back_propagate())
